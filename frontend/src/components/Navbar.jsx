@@ -1,0 +1,13 @@
+function Navbar({ onLogout }) {
+  return (
+    <nav className="navbar">
+      <h2>NotifyHub</h2>
+
+      <button onClick={onLogout}>
+        Logout
+      </button>
+    </nav>
+  );
+}
+
+export default Navbar;

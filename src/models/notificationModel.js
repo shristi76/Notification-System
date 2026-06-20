@@ -25,7 +25,27 @@ const updateStatus = async (id, status) => {
     );
 };
 
+const getUserNotifications = async (userId) => {
+    const result = await db.query(
+        `SELECT
+            id,
+            recipient,
+            subject,
+            message,
+            type,
+            status,
+            created_at
+         FROM notifications
+         WHERE user_id = $1
+         ORDER BY created_at DESC`,
+        [userId]
+    );
+
+    return result.rows;
+};
+
 module.exports = {
     createNotification,
     updateStatus,
+      getUserNotifications
 };
