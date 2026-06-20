@@ -1,7 +1,13 @@
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const db = require("../config/db");
+
+
+
+const {
+    findUserByEmail,
+    createUser
+} = require("../models/userModel");
 
 const register = async (req, res) => {
     try {
@@ -15,12 +21,14 @@ const register = async (req, res) => {
         }
 
         // Check if email exists
-        const user = await db.query(
-            "SELECT * FROM users WHERE email=$1",
-            [email]
-        );
+        // const user = await db.query(
+        //     "SELECT * FROM users WHERE email=$1",
+        //     [email]
+        // );
 
-        if (user.rows.length > 0) {
+        const user = await findUserByEmail(email);
+
+        if (user.length > 0) {
             return res.status(400).json({
                 message: "Email already exists"
             });
@@ -29,12 +37,18 @@ const register = async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert user
-        await db.query(
-            `INSERT INTO users(name,email,password)
-             VALUES($1,$2,$3)`,
-            [name, email, hashedPassword]
-        );
+        // // Insert user
+        // await db.query(
+        //     `INSERT INTO users(name,email,password)
+        //      VALUES($1,$2,$3)`,
+        //     [name, email, hashedPassword]
+        // );
+
+        await createUser(
+    name,
+    email,
+    hashedPassword
+);
 
         res.status(201).json({
             message: "User registered successfully"
@@ -63,18 +77,19 @@ const login = async (req, res) => {
         }
 
         // Find user
-        const result = await db.query(
-            "SELECT * FROM users WHERE email = $1",
-            [email]
-        );
+        // const result = await db.query(
+        //     "SELECT * FROM users WHERE email = $1",
+        //     [email]
+        // );
+        const result = await findUserByEmail(email);
 
-        if (result.rows.length === 0) {
+        if (result.length === 0) {
             return res.status(401).json({
                 message: "Invalid email or password"
             });
         }
 
-        const user = result.rows[0];
+        const user = result[0];
 
         // Compare password
         const isMatch = await bcrypt.compare(password, user.password);
